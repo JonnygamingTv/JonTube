@@ -7,3 +7,6 @@ Usage:
 using the ?v= input do
 getJTVideo(id);
 and it will either return error or it will return a json
+
+
+This is still in work :)
