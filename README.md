@@ -19,6 +19,7 @@ function test(thing) {
 		console.log(error);
 	}
 }
+jontube.getuser('rK9JTIdB2eqsEkWQ', test);
 ```
 
 This is still in work :)
