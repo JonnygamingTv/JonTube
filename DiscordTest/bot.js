@@ -17,6 +17,7 @@ client.on("message", async message => {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
   } else if(command === "play") {
+	if(message.channel.type == 'text') {
 	  let stuff = args.join(0).split('?v=');
 	  if(stuff[1]) {
 	  if(stuff[0].toLowerCase().includes("jontube.com")) {
@@ -45,12 +46,17 @@ client.on("message", async message => {
 	  } else {
 		  message.reply("No video provided");
 	  }
+	}
   } else if(command === "nowplaying" || command == "np") {
+	  if(message.channel.type == 'text') {
 	  if(guilds[message.guild.id]) {
 		  
 	  }
+	  }
   } else if(command === "queue") {
-	  
+	  if(message.channel.type == 'text') {
+	  message.reply(guilds[message.guild.id].queue);
+	  }
   }
 });
 function playMusic(message, JSONobj) {
@@ -59,7 +65,8 @@ guilds[message.guild.id] = {
 dispatcher: null,
 queue: [],
 channel: null,
-timeout: null
+timeout: null,
+playing: false
 }
 }
 if(message.member.voiceChannel) {
@@ -67,22 +74,29 @@ if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = messag
 guilds[message.guild.id].queue.push(JSONobj.vF);
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
+if(!guilds[message.guild.id].playing) {
 guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`https://JonTube.com/${guilds[message.guild.id].queue[0]}`);
 guilds[message.guild.id].dispatcher.setVolume(0.8);
 guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
+guilds[message.guild.id].playing = true;
+}
+if(!guilds[message.guild.id].queue[0] && !guilds[message.guild.id].dispatcher) {
 guilds[message.guild.id].dispatcher.on('end', () => {
 guilds[message.guild.id].queue.shift();
 if(!guilds[message.guild.id].queue[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
 guilds[message.guild.id].channel.leave();
+guilds[message.guild.id].dispatcher.destroy();
 guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
+guilds[message.guild.id].playing = false;
 }, 60000);
 } else {
-	playMusic(message);
+	playMusic(message, JSONobj);
 }
 });
+}
 });
 }
 }
