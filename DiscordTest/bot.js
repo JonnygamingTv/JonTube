@@ -110,7 +110,7 @@ guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
-if(!guilds[message.guild.id].queueF[0] && !guilds[message.guild.id].dispatcher) {
+if(!guilds[message.guild.id].queueF[0]) {
 guilds[message.guild.id].dispatcher.on('end', function() {
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
