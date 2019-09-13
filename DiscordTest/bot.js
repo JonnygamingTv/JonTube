@@ -33,6 +33,11 @@ client.on("message", async message => {
 					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
 					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
+					  if(message.member.voiceChannel) {
+						  message.member.voiceChannel.join().then(connection => {
+							  connection.playArbitraryInput(JSONobj.vF);
+						  });
+					  }
 					  }
 				  });
 			  } catch(error) {
