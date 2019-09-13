@@ -60,11 +60,11 @@ client.on("message", async message => {
 					  if(userdata) {
 					  let userJSON = JSON.parse(userdata);
 					  let embed = new Discord.RichEmbed()
-					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"))
+					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"))
 					  .setTitle(`${JSONobj.n}`)
 					  .setDescription(`${JSONobj.d}\n\n_Uploaded by [${userJSON.n}](https://www.JonTube.com/channels/${JSONobj.cid})_`)
-					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
-					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
+					  .setThumbnail(`https://JonTube.com/${encodeURI(JSONobj.thumb)}`)
+					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
 					  }
 				  });
@@ -111,7 +111,7 @@ guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
 if(!guilds[message.guild.id].queueF[0] && !guilds[message.guild.id].dispatcher) {
-guilds[message.guild.id].dispatcher.on('end', () => {
+guilds[message.guild.id].dispatcher.on('end', function() {
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
 guilds[message.guild.id].queueF.pop();
@@ -127,7 +127,9 @@ guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
 }, 60000);
 } else {
+	setTimeout(function() {
 	playMusic(message, JSONobj);
+	}, 1000);
 }
 });
 }
