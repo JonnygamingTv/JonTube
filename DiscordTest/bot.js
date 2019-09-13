@@ -7,6 +7,7 @@ client.on('ready', () => {
 	console.log(`I'm ready as ${client.user.tag}`);
 	client.user.setPresence({game: {name: 'JonTubing'}, status: 'online'});
 });
+let guilds = {};
 client.on("message", async message => {
   if(message.author.bot) return;
   if(message.content.indexOf(config.prefix) !== 0) return;
@@ -17,7 +18,6 @@ client.on("message", async message => {
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
   } else if(command === "play") {
 	  let stuff = args.join(0).split('?v=');
-	  console.log(stuff[1]);
 	  if(stuff[1]) {
 	  if(stuff[0].toLowerCase().includes("jontube.com")) {
 		  jontube(stuff[1], function(videodata) {
@@ -33,14 +33,7 @@ client.on("message", async message => {
 					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
 					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
-					  if(message.member.voiceChannel) {
-						  message.member.voiceChannel.join().then(connection => {
-							  const dispatcher = connection.playArbitraryInput(`https://JonTube.com/${JSONobj.vF}`);
-							  dispatcher.setVolume(0.8);
-							  dispatcher.setBitrate(64);
-							  dispatcher.player.opusEncoder.bitrate = 64;
-						  });
-					  }
+					playMusic(message, JSONobj);
 					  }
 				  });
 			  } catch(error) {
@@ -52,5 +45,44 @@ client.on("message", async message => {
 	  } else {
 		  message.reply("No video provided");
 	  }
+  } else if(command === "nowplaying" || command == "np") {
+	  if(guilds[message.guild.id]) {
+		  
+	  }
+  } else if(command === "queue") {
+	  
   }
 });
+function playMusic(message, JSONobj) {
+if(!guilds[message.guild.id]) {
+guilds[message.guild.id] = {
+dispatcher: null,
+queue: [],
+channel: null,
+timeout: null
+}
+}
+if(message.member.voiceChannel) {
+if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = message.member.voiceChannel;} else if(message.member.hasPermission('MANAGE_GUILD')) {guilds[message.guild.id].channel = message.member.voiceChannel;}
+guilds[message.guild.id].queue.push(JSONobj.vF);
+guilds[message.guild.id].channel.join().then(connection => {
+if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
+guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`https://JonTube.com/${guilds[message.guild.id].queue[0]}`);
+guilds[message.guild.id].dispatcher.setVolume(0.8);
+guilds[message.guild.id].dispatcher.setBitrate(64);
+guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
+guilds[message.guild.id].dispatcher.on('end', () => {
+guilds[message.guild.id].queue.shift();
+if(!guilds[message.guild.id].queue[0]) {
+guilds[message.guild.id].timeout = setTimeout(function() {
+guilds[message.guild.id].channel.leave();
+guilds[message.guild.id].dispatcher = null;
+guilds[message.guild.id].channel = null;
+}, 60000);
+} else {
+	playMusic(message);
+}
+});
+});
+}
+}
