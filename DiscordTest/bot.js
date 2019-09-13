@@ -110,7 +110,7 @@ guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
-if(!guilds[message.guild.id].queueF[0]) {
+if(!first) {
 guilds[message.guild.id].dispatcher.on('end', function() {
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
@@ -119,7 +119,7 @@ guilds[message.guild.id].queue.shift();
 guilds[message.guild.id].queue.pop();
 guilds[message.guild.id].queueID.shift();
 guilds[message.guild.id].queueID.pop();
-if(first) {
+if(!guilds[message.guild.id].queue[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
 guilds[message.guild.id].channel.leave();
 guilds[message.guild.id].dispatcher.destroy();
