@@ -30,11 +30,11 @@ client.on("message", async message => {
 					  if(userdata) {
 					  let userJSON = JSON.parse(userdata);
 					  let embed = new Discord.RichEmbed()
-					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"))
+					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"))
 					  .setTitle(`${JSONobj.n}`)
 					  .setDescription(`${JSONobj.d}\n\n_Uploaded by [${userJSON.n}](https://www.JonTube.com/channels/${JSONobj.cid})_`)
-					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
-					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
+					  .setThumbnail(`https://JonTube.com/${encodeURI(JSONobj.thumb)}`)
+					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
 					playMusic(message, JSONobj);
 					  }
@@ -52,7 +52,31 @@ client.on("message", async message => {
   } else if(command === "nowplaying" || command == "np") {
 	  if(message.channel.type == 'text') {
 	  if(guilds[message.guild.id]) {
-		  
+		  if(guilds[message.guild.id].queue[0]) {
+		  jontube(guilds[message.guild.id].queue[0], function(videodata) {
+			  try {
+				  let JSONobj = JSON.parse(videodata);
+				  jontube.getuser(JSONobj.cid, function(userdata){
+					  if(userdata) {
+					  let userJSON = JSON.parse(userdata);
+					  let embed = new Discord.RichEmbed()
+					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"))
+					  .setTitle(`${JSONobj.n}`)
+					  .setDescription(`${JSONobj.d}\n\n_Uploaded by [${userJSON.n}](https://www.JonTube.com/channels/${JSONobj.cid})_`)
+					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
+					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
+					  message.reply(embed);
+					playMusic(message, JSONobj);
+					  }
+				  });
+			  } catch(error) {
+				  console.log(error);
+			  }
+			  
+		  });
+		  } else {
+			  message.reply("Nothing is currently playing.");
+		  }
 	  }
 	  }
   } else if(command === "queue") {
@@ -66,6 +90,7 @@ if(!guilds[message.guild.id]) {
 guilds[message.guild.id] = {
 dispatcher: null,
 queue: [],
+queueF: [],
 channel: null,
 timeout: null,
 playing: false
@@ -73,20 +98,22 @@ playing: false
 }
 if(message.member.voiceChannel) {
 if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = message.member.voiceChannel;} else if(message.member.hasPermission('MANAGE_GUILD')) {guilds[message.guild.id].channel = message.member.voiceChannel;}
-guilds[message.guild.id].queue.push(JSONobj.vF);
+guilds[message.guild.id].queueF.push(JSONobj.vF);
+guilds[message.guild.id].queue.push(JSONobj.n);
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
 if(!guilds[message.guild.id].playing) {
-guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`https://JonTube.com/${guilds[message.guild.id].queue[0]}`);
+guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`https://JonTube.com/${encodeURI(guilds[message.guild.id].queueF[0])}`);
 guilds[message.guild.id].dispatcher.setVolume(0.8);
 guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
-if(!guilds[message.guild.id].queue[0] && !guilds[message.guild.id].dispatcher) {
+if(!guilds[message.guild.id].queueF[0] && !guilds[message.guild.id].dispatcher) {
 guilds[message.guild.id].dispatcher.on('end', () => {
+guilds[message.guild.id].queueF.shift();
 guilds[message.guild.id].queue.shift();
-if(!guilds[message.guild.id].queue[0]) {
+if(!guilds[message.guild.id].queueF[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
 guilds[message.guild.id].channel.leave();
 guilds[message.guild.id].dispatcher.destroy();
