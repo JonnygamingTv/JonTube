@@ -35,7 +35,7 @@ client.on("message", async message => {
 					  message.reply(embed);
 					  if(message.member.voiceChannel) {
 						  message.member.voiceChannel.join().then(connection => {
-							  connection.playArbitraryInput(JSONobj.vF);
+							  const dispatcher = connection.playArbitraryInput(`https://JonTube.com/${JSONobj.vF}`);
 						  });
 					  }
 					  }
