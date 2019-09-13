@@ -22,6 +22,7 @@ client.on("message", async message => {
 	if(message.channel.type == 'text') {
 	  let stuff = args.join(0).split('?v=');
 	  if(stuff[1]) {
+		  stuff[1] = stuff[1].replace("\n","");
 	  if(stuff[0].toLowerCase().includes("jontube.com")) {
 		  jontube(stuff[1], function(videodata) {
 			  try {
@@ -36,7 +37,7 @@ client.on("message", async message => {
 					  .setThumbnail(`https://JonTube.com/${encodeURI(JSONobj.thumb)}`)
 					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
-					playMusic(message, JSONobj, stuff[1], true);
+					playMusic(message, JSONobj, stuff[1]);
 					  }
 				  });
 			  } catch(error) {
@@ -84,7 +85,7 @@ client.on("message", async message => {
 	  }
   }
 });
-function playMusic(message, JSONobj, ID, first) {
+function playMusic(message, JSONobj, ID) {
 if(!guilds[message.guild.id]) {
 guilds[message.guild.id] = {
 dispatcher: null,
@@ -99,8 +100,8 @@ playing: false
 if(message.member.voiceChannel) {
 if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = message.member.voiceChannel;} else if(message.member.hasPermission('MANAGE_GUILD')) {guilds[message.guild.id].channel = message.member.voiceChannel;}
 guilds[message.guild.id].queueF.push(JSONobj.vF);
-guilds[message.guild.id].queue.push(JSONobj.n);
 if(ID) guilds[message.guild.id].queueID.push(ID);
+if(!guilds[message.guild.id].channel) return;
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
 if(!guilds[message.guild.id].playing) {
@@ -110,7 +111,7 @@ guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
-if(first) {
+if(!guilds[message.guild.id].queue[0]) {
 guilds[message.guild.id].dispatcher.on('end', function() {
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
@@ -121,8 +122,8 @@ guilds[message.guild.id].queueID.shift();
 guilds[message.guild.id].queueID.pop();
 if(!guilds[message.guild.id].queue[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
-guilds[message.guild.id].channel.leave();
-guilds[message.guild.id].dispatcher.destroy();
+if(guilds[message.guild.id].channel) guilds[message.guild.id].channel.leave();
+guilds[message.guild.id].dispatcher.removeListener();
 guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
 }, 60000);
@@ -133,6 +134,7 @@ guilds[message.guild.id].channel = null;
 }
 });
 }
+guilds[message.guild.id].queue.push(JSONobj.n);
 });
 }
 }
