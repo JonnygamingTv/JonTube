@@ -4,6 +4,7 @@ let client = new Discord.Client();
 let config = require("./config.json");
 client.login(config.token);
 client.on('ready', () => {
+	console.log(`I'm ready as ${client.user.tag}`);
 	client.user.setPresence({game: {name: 'JonTubing'}, status: 'online'});
 });
 client.on("message", async message => {
@@ -15,7 +16,8 @@ client.on("message", async message => {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
   } else if(command === "play") {
-	  let stuff = args.slice(0).join('?v=');
+	  let stuff = args.join(0).split('?v=');
+	  console.log(stuff[1]);
 	  if(stuff[1]) {
 	  if(stuff[0].toLowerCase().includes("jontube.com")) {
 		  jontube(stuff[1], function(videodata) {
@@ -25,11 +27,11 @@ client.on("message", async message => {
 					  if(userdata) {
 					  let userJSON = JSON.parse(userdata);
 					  let embed = new Discord.RichEmbed()
-					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://www.JonTube.com/uploads/"+userJSON.i:"https://www.JonTube.com/JonTube.png"))
+					  .setAuthor(`${userJSON.n}`, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"))
 					  .setTitle(`${JSONobj.n}`)
 					  .setDescription(`${JSONobj.d}\n\n_Uploaded by [${userJSON.n}](https://www.JonTube.com/channels/${JSONobj.cid})_`)
 					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
-					  .setFooter(JSONobj.up, (userJSON.i?"https://www.JonTube.com/uploads/"+userJSON.i:"https://www.JonTube.com/JonTube.png"));
+					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
 					  }
 				  });
@@ -44,15 +46,3 @@ client.on("message", async message => {
 	  }
   }
 });
-function playstart(thing) {
-	try {
-		let JSONobj = JSON.parse(thing);
-		console.log(JSONobj.n);
-    jontube.getuser(JSONobj.cid, play);
-	} catch(error) {
-		console.log(error);
-	}
-}
-function play(thing) {
-
-}
