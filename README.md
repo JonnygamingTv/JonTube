@@ -1,7 +1,7 @@
 # JonTube
 JonTube
 
-Using the [npm package](https://npmjs.org/packages/jontube) will make you able to easily use the website to get info etc.
+Using the [npm package](https://npmjs.org/package/jontube) will make you able to easily use the website to get info etc.
 Usage:
 using the ?v= input do
 getJTVideo(id);
