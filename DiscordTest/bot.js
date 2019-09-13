@@ -36,6 +36,9 @@ client.on("message", async message => {
 					  if(message.member.voiceChannel) {
 						  message.member.voiceChannel.join().then(connection => {
 							  const dispatcher = connection.playArbitraryInput(`https://JonTube.com/${JSONobj.vF}`);
+							  dispatcher.setVolume(0.8);
+							  dispatcher.setBitrate(64);
+							  dispatcher.player.opusEncoder.bitrate = 64;
 						  });
 					  }
 					  }
