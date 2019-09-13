@@ -16,6 +16,8 @@ client.on("message", async message => {
   if(command === "ping") {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
+  } else if(command === 'invite') {
+	  message.reply(`https://discordapp.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=0&redirect_uri=https%3A%2F%2Fwww.JonTube.com&scope=bot`);
   } else if(command === "play") {
 	if(message.channel.type == 'text') {
 	  let stuff = args.join(0).split('?v=');
