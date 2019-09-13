@@ -1,7 +1,7 @@
 # JonTube
 JonTube
 
-Using the npm package will make you able to easily use the website to get info etc.
+Using the [npm package](https://npmjs.org/packages/jontube) will make you able to easily use the website to get info etc.
 Usage:
 using the ?v= input do
 getJTVideo(id);
@@ -21,4 +21,4 @@ function test(thing) {
 jontube.getuser('rK9JTIdB2eqsEkWQ', test);
 ```
 
-This is still in work :)
+You can also try it out in the bot I made (Discord), [Invite](https://discordapp.com/api/oauth2/authorize?client_id=621320606343888896&permissions=0&redirect_uri=https%3A%2F%2Fwww.JonTube.com&scope=bot)
