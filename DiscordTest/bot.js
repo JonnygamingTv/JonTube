@@ -36,7 +36,7 @@ client.on("message", async message => {
 					  .setThumbnail(`https://JonTube.com/${encodeURI(JSONobj.thumb)}`)
 					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+encodeURI([userJSON.i.slice(3)]):"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
-					playMusic(message, JSONobj);
+					playMusic(message, JSONobj, stuff[1]);
 					  }
 				  });
 			  } catch(error) {
@@ -52,8 +52,8 @@ client.on("message", async message => {
   } else if(command === "nowplaying" || command == "np") {
 	  if(message.channel.type == 'text') {
 	  if(guilds[message.guild.id]) {
-		  if(guilds[message.guild.id].queue[0]) {
-		  jontube(guilds[message.guild.id].queue[0], function(videodata) {
+		  if(guilds[message.guild.id].queueID[0]) {
+		  jontube(guilds[message.guild.id].queueID[0], function(videodata) {
 			  try {
 				  let JSONobj = JSON.parse(videodata);
 				  jontube.getuser(JSONobj.cid, function(userdata){
@@ -66,7 +66,6 @@ client.on("message", async message => {
 					  .setThumbnail(`https://JonTube.com/${JSONobj.thumb}`)
 					  .setFooter(JSONobj.up, (userJSON.i?"https://JonTube.com/"+[userJSON.i.slice(3)]:"https://www.JonTube.com/JonTube.png"));
 					  message.reply(embed);
-					playMusic(message, JSONobj);
 					  }
 				  });
 			  } catch(error) {
@@ -85,12 +84,13 @@ client.on("message", async message => {
 	  }
   }
 });
-function playMusic(message, JSONobj) {
+function playMusic(message, JSONobj, ID) {
 if(!guilds[message.guild.id]) {
 guilds[message.guild.id] = {
 dispatcher: null,
 queue: [],
 queueF: [],
+queueID: [],
 channel: null,
 timeout: null,
 playing: false
@@ -100,6 +100,7 @@ if(message.member.voiceChannel) {
 if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = message.member.voiceChannel;} else if(message.member.hasPermission('MANAGE_GUILD')) {guilds[message.guild.id].channel = message.member.voiceChannel;}
 guilds[message.guild.id].queueF.push(JSONobj.vF);
 guilds[message.guild.id].queue.push(JSONobj.n);
+if(ID) guilds[message.guild.id].queueID.push(ID);
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
 if(!guilds[message.guild.id].playing) {
@@ -111,15 +112,19 @@ guilds[message.guild.id].playing = true;
 }
 if(!guilds[message.guild.id].queueF[0] && !guilds[message.guild.id].dispatcher) {
 guilds[message.guild.id].dispatcher.on('end', () => {
+guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
+guilds[message.guild.id].queueF.pop();
 guilds[message.guild.id].queue.shift();
+guilds[message.guild.id].queue.pop();
+guilds[message.guild.id].queueID.shift();
+guilds[message.guild.id].queueID.pop();
 if(!guilds[message.guild.id].queueF[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
 guilds[message.guild.id].channel.leave();
 guilds[message.guild.id].dispatcher.destroy();
 guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
-guilds[message.guild.id].playing = false;
 }, 60000);
 } else {
 	playMusic(message, JSONobj);
