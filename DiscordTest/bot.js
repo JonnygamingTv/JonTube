@@ -81,7 +81,17 @@ client.on("message", async message => {
 	  }
   } else if(command === "queue") {
 	  if(message.channel.type == 'text') {
+		  if(guilds[message.guild.id]) {
+		  if(args[0] == 'clear') {
+			  if(message.member.hasPermission('MANAGE_GUILD')) {
+guilds[message.guild.id].queueF = [];
+guilds[message.guild.id].queue = [];
+guilds[message.guild.id].queueID = [];
+message.reply('cleared!');
+			  }
+		  }
 	  message.reply(guilds[message.guild.id].queue);
+		  }
 	  }
   }
 });
@@ -100,14 +110,15 @@ listening: false
 }
 if(message.member.voiceChannel) {
 if(!guilds[message.guild.id].channel) {guilds[message.guild.id].channel = message.member.voiceChannel;} else if(message.member.hasPermission('MANAGE_GUILD')) {guilds[message.guild.id].channel = message.member.voiceChannel;}
-guilds[message.guild.id].queueF.push(JSONobj.vF);
-if(ID) guilds[message.guild.id].queueID.push(ID);
+if(ID) {guilds[message.guild.id].queueF.push(JSONobj.vF);
+guilds[message.guild.id].queueID.push(ID);
+guilds[message.guild.id].queue.push(JSONobj.n);}
 if(!guilds[message.guild.id].channel) return;
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
 if(!guilds[message.guild.id].playing) {
 guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`http://JonTube.com/${encodeURI(guilds[message.guild.id].queueF[0])}`);
-guilds[message.guild.id].dispatcher.setVolume(0.8);
+guilds[message.guild.id].dispatcher.setVolume(0.7);
 guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
@@ -115,27 +126,28 @@ guilds[message.guild.id].playing = true;
 if(!guilds[message.guild.id].listening) {
 	guilds[message.guild.id].listening = true;
 guilds[message.guild.id].dispatcher.on('end', function() {
+	console.log("ended");
+	guilds[message.guild.id].listening = false;
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
-guilds[message.guild.id].queueF.pop();
 guilds[message.guild.id].queue.shift();
-guilds[message.guild.id].queue.pop();
 guilds[message.guild.id].queueID.shift();
-guilds[message.guild.id].queueID.pop();
 if(!guilds[message.guild.id].queue[0]) {
+	console.log("no more");
 guilds[message.guild.id].timeout = setTimeout(function() {
 if(guilds[message.guild.id].channel) guilds[message.guild.id].channel.leave();
 guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
 }, 60000);
 } else {
+	console.log("there's more");
 	setTimeout(function() {
+		guilds[message.guild.id].playing = false;
 	playMusic(message, JSONobj);
 	}, 1000);
 }
 });
 }
-guilds[message.guild.id].queue.push(JSONobj.n);
 });
 }
 }
