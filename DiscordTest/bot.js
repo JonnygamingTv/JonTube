@@ -94,7 +94,8 @@ queueF: [],
 queueID: [],
 channel: null,
 timeout: null,
-playing: false
+playing: false,
+listening: false
 }
 }
 if(message.member.voiceChannel) {
@@ -105,13 +106,14 @@ if(!guilds[message.guild.id].channel) return;
 guilds[message.guild.id].channel.join().then(connection => {
 if(guilds[message.guild.id].timeout) clearTimeout(guilds[message.guild.id].timeout);
 if(!guilds[message.guild.id].playing) {
-guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`https://JonTube.com/${encodeURI(guilds[message.guild.id].queueF[0])}`);
+guilds[message.guild.id].dispatcher = connection.playArbitraryInput(`http://JonTube.com/${encodeURI(guilds[message.guild.id].queueF[0])}`);
 guilds[message.guild.id].dispatcher.setVolume(0.8);
 guilds[message.guild.id].dispatcher.setBitrate(64);
 guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
-if(!guilds[message.guild.id].queue[0]) {
+if(!guilds[message.guild.id].listening) {
+	guilds[message.guild.id].listening = true;
 guilds[message.guild.id].dispatcher.on('end', function() {
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
@@ -123,7 +125,6 @@ guilds[message.guild.id].queueID.pop();
 if(!guilds[message.guild.id].queue[0]) {
 guilds[message.guild.id].timeout = setTimeout(function() {
 if(guilds[message.guild.id].channel) guilds[message.guild.id].channel.leave();
-guilds[message.guild.id].dispatcher.removeListener();
 guilds[message.guild.id].dispatcher = null;
 guilds[message.guild.id].channel = null;
 }, 60000);
