@@ -13,12 +13,15 @@ client.on("message", async message => {
   if(message.content.indexOf(config.prefix) !== 0) return;
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
-  if(command === "ping") {
-    const m = await message.channel.send("Ping?");
+  switch(command) {
+  case "ping":
+	const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
-  } else if(command === 'invite') {
-	  message.reply(`https://discordapp.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=0&redirect_uri=https%3A%2F%2Fwww.JonTube.com&scope=bot`);
-  } else if(command === "play") {
+	break;
+  case "invite":
+	message.reply(`https://discordapp.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=0&redirect_uri=https%3A%2F%2Fwww.JonTube.com&scope=bot`);
+	break;
+  case "play":
 	if(message.channel.type == 'text') {
 	  let stuff = args.join(0).split('?v=');
 	  if(stuff[1]) {
@@ -50,7 +53,9 @@ client.on("message", async message => {
 		  message.reply("No video provided");
 	  }
 	}
-  } else if(command === "nowplaying" || command == "np") {
+	break;
+  case "nowplaying":
+  case "np":
 	  if(message.channel.type == 'text') {
 	  if(guilds[message.guild.id]) {
 		  if(guilds[message.guild.id].queueID[0]) {
@@ -79,7 +84,8 @@ client.on("message", async message => {
 		  }
 	  }
 	  }
-  } else if(command === "queue") {
+	break;
+  case "queue":
 	  if(message.channel.type == 'text') {
 		  if(guilds[message.guild.id]) {
 		  if(args[0] == 'clear') {
@@ -93,6 +99,34 @@ message.reply('cleared!');
 	  message.reply(guilds[message.guild.id].queue);
 		  }
 	  }
+	break;
+  case "skip":
+	  if(message.channel.type == 'text') {
+		  if(guilds[message.guild.id]) {
+			  if(guilds[message.guild.id].dispatcher) {
+				  if(message.member.hasPermission('MANAGE_GUILD')) {
+					  guilds[message.guild.id].dispatcher.end();
+					  message.reply("Skipped!");
+				  } else {
+					  if(!guilds[message.guild.id].skippers) guilds[message.guild.id].skippers = [];
+					  if(!guilds[message.guild.id].skips) guilds[message.guild.id].skips = 0;
+					  if(!guilds[message.guild.id].skippers.includes(message.author.id)) {
+						  guilds[message.guild.id].skippers.push(message.author.id);
+						  guilds[message.guild.id].skips++;
+						  if((guilds[message.guild.id].skips / guilds[message.guild.id].channel.members) > 0.5) {
+							  guilds[message.guild.id].dispatcher.end();
+							  message.reply("Skipped!");
+						  } else {
+						  message.reply(`You want to skip! **${guilds[message.guild.id].skips}/${[message.guild.id].channel.members.size}** wanted this.`);
+						  }
+					  } else {
+						  message.reply(`You already want to skip this, you need **${(guilds[message.guild.id].channel.members.size / 2) - guilds[message.guild.id].skips}** more people to do this`);
+					  }
+				  }
+			  }
+		  }
+	  }
+	break;
   }
 });
 function playMusic(message, JSONobj, ID) {
@@ -127,6 +161,8 @@ if(!guilds[message.guild.id].listening) {
 	guilds[message.guild.id].listening = true;
 guilds[message.guild.id].dispatcher.on('end', function() {
 	console.log("ended");
+	if(guilds[message.guild.id].skippers) guilds[message.guild.id].skippers = [];
+	if(guilds[message.guild.id].skips) guilds[message.guild.id].skips = 0;
 	guilds[message.guild.id].listening = false;
 guilds[message.guild.id].playing = false;
 guilds[message.guild.id].queueF.shift();
