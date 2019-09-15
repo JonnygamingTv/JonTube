@@ -1,0 +1,1 @@
+npm i jontube discord.js ffmpeg-binaries opusscript node-opus
