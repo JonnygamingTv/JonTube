@@ -48,8 +48,21 @@ client.on("message", async message => {
 			  }
 			  
 		  });
+	  } else {
+		  jontube.search(args.slice(0).join(' '), function(result) {
+			  console.log(result);
+			  
+			  
+		  });
+		  
 	  }
 	  } else {
+		  let evrythin = args.slice(0).join(' ');
+		  if(evrythin) {
+		  return jontube.search(evrythin, function(result) {
+			  console.log(result);
+		  });
+		  }
 		  message.reply("No video provided");
 	  }
 	}
@@ -158,6 +171,9 @@ guilds[message.guild.id].dispatcher.player.opusEncoder.bitrate = 64;
 guilds[message.guild.id].playing = true;
 }
 if(!guilds[message.guild.id].listening) {
+guilds[message.guild.id].dispatcher.on('error', function(err) {
+	console.log(err);
+});
 	guilds[message.guild.id].listening = true;
 guilds[message.guild.id].dispatcher.on('end', function() {
 	console.log("ended");
